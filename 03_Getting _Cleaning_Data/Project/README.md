@@ -22,5 +22,5 @@ Please see the R code in the [runanalysis.R](https://github.com/rajaram-ramakris
 4. Test Dataset is loaded using the files X_test.txt, y_test.txt and subject_test.txt files. X_test.txt file will have 561 measurements for each subjects and only the measurements selected in step 2 will be loaded.
 5. Combine train and test data in to single dataset.
 6. Calculate the mean of the measures at subject and Activity level.
-7. Write the output to the file tidyData.txt
+7. Write the output to the file [tidyData.txt](https://github.com/rajaram-ramakrishnan/datascience_specalization_coursera/blob/master/03_Getting%20_Cleaning_Data/Project/tidyData.txt)
 
