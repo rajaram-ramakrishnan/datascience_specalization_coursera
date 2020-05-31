@@ -1,6 +1,6 @@
 # Week2 Quiz
 
-######Question 1
+###### Question 1
 
 Under the lattice graphics system, what do the primary plotting functions like xyplot() and bwplot() return?
 
@@ -25,7 +25,7 @@ class(plot)
 
 - an object of class "trellis"
 
-######Question 2
+###### Question 2
 
 What is produced by the following code?
 
@@ -49,7 +49,7 @@ Answer :
 - A set of 3 panels showing the relationship between weight and time for each diet.
 - Link to Images
 
-######Question 3
+###### Question 3
 
 Annotation of plots in any plotting system involves adding points, lines, or text to the plot, in addition to customizing axis labels or adding titles. Different plotting systems have different sets of functions for annotating plots in this way.
 
@@ -67,7 +67,7 @@ Ans :
 
 - panel.lmline()
 
-######Question 4
+###### Question 4
 
 The following code does NOT result in a plot appearing on the screen device.
 
@@ -92,7 +92,7 @@ Ans :
 
 - The object 'p' has not yet been printed with the appropriate print method.
 
-######Question 5
+###### Question 5
 
 In the lattice system, which of the following functions can be used to finely control the appearance of all lattice plots?
 
@@ -108,7 +108,7 @@ Ans :
 
 - trellis.par.set()
 
-######Question 6
+###### Question 6
 
 What is ggplot2 an implementation of?
 
@@ -124,7 +124,7 @@ Ans :
 
 - the Grammar of Graphics developed by Leland Wilkinson
 
-######Question 7
+###### Question 7
 
 Load the `airquality' dataset form the datasets package in R
 
@@ -156,7 +156,7 @@ qplot(Wind,Ozone,data=airquality,facets = . ~ factor(Month))
 
 - Link to Images
 
-######Question 8
+###### Question 8
 
 What is a geom in the ggplot2 system?
 
@@ -172,7 +172,7 @@ Ans :
 
 - a plotting object like point, line, or other shape
 
-######Question 9
+###### Question 9
 
 When I run the following code I get an error:
 
@@ -197,7 +197,7 @@ Ans :
 
 - ggplot does not yet know what type of layer to add to the plot.
 
-######Question 10
+###### Question 10
 
 The following code creates a scatterplot of 'votes' and 'rating' from the movies dataset in the ggplot2 package. After loading the ggplot2 package with the library() function, I can run
 
