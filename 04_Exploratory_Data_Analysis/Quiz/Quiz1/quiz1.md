@@ -38,17 +38,17 @@ Ans :
 
 Which of the following is true about the base plotting system?
 
-- The system is most useful for conditioning plots
+-The system is most useful for conditioning plots
 
-- Margins and spacings are adjusted automatically depending on the type of plot and the data
+-Margins and spacings are adjusted automatically depending on the type of plot and the data
 
-- Plots are typically created with a single function call
+-Plots are typically created with a single function call
 
-- Plots are created and annotated with separate functions
+-Plots are created and annotated with separate functions
 
 Ans :
 
-- Plots are created and annotated with separate functions
+-Plots are created and annotated with separate functions
 
 Functions like 'plot' or 'hist' typically create the plot on the graphics device and functions like 'lines', 'text', or 'points' will annotate or add data to the plot.
 
@@ -56,118 +56,118 @@ Functions like 'plot' or 'hist' typically create the plot on the graphics device
 
 Which of the following is an example of a valid graphics device in R?
 
-- A socket connection
+-A socket connection
 
-- A file folder
+-A file folder
 
-- The computer screen
+-The computer screen
 
-- A Microsoft Word document
+-A Microsoft Word document
 
-- The keyboard
+-The keyboard
 
 Ans :
 
-- The computer screen
+-The computer screen
 
 5.Question 5
 
 Which of the following is an example of a vector graphics device in R?
 
-- Postscript
+-Postscript
 
-- JPEG
+-JPEG
 
-- PNG
+-PNG
 
-- TIFF
+-TIFF
 
-- GIF
+-GIF
 
 Ans :
 
-- Postscript
+-Postscript
 
 
 6.Question 6
 
 Bitmapped file formats can be most useful for
 
-- Plots that are not scaled to a specific resolution
+-Plots that are not scaled to a specific resolution
 
-- Scatterplots with many many points
+-Scatterplots with many many points
 
-- Plots that may need to be resized
+-Plots that may need to be resized
 
-- Plots that require animation or interactivity
+-Plots that require animation or interactivity
 
 Ans :
 
-- Scatterplots with many many points
+-Scatterplots with many many points
 
 7.Question 7
 
 Which of the following functions is typically used to add elements to a plot in the base graphics system?
 
-- plot()
+-plot()
 
-- lines()
+-lines()
 
-- hist()
+-hist()
 
-- boxplot()
+-boxplot()
 
 Ans :
 
-- lines()
+-lines()
 
 
 8.Question 8
 
 Which function opens the screen graphics device on Windows?
 
-- postscript()
+-postscript()
 
-- jpeg()
+-jpeg()
 
-- windows()
+-windows()
 
-- xfig()
+-xfig()
 
 Ans :
 
-- windows()
+-windows()
 
 9.Question 9
 
 What does the 'pch' option to par() control?
 
-- the plotting symbol/character in the base graphics system
+-the plotting symbol/character in the base graphics system
 
-- the orientation of the axis labels on the plot
+-the orientation of the axis labels on the plot
 
-- the size of the plotting symbol in a scatterplot
+-the size of the plotting symbol in a scatterplot
 
-- the line width in the base graphics system
+-the line width in the base graphics system
 
 Ans :
 
-- the plotting symbol/character in the base graphics system
+-the plotting symbol/character in the base graphics system
 
 
 10.Question 10
 
 If I want to save a plot to a PDF file, which of the following is a correct way of doing that?
 
-- Construct the plot on the PNG device with png(), then copy it to a PDF with dev.copy2pdf().
+-Construct the plot on the PNG device with png(), then copy it to a PDF with dev.copy2pdf().
 
-- Open the PostScript device with postscript(), construct the plot, then close the device with dev.off().
+-Open the PostScript device with postscript(), construct the plot, then close the device with dev.off().
 
-- Open the screen device with quartz(), construct the plot, and then close the device with dev.off().
+-Open the screen device with quartz(), construct the plot, and then close the device with dev.off().
 
-- Construct the plot on the screen device and then copy it to a PDF file with dev.copy2pdf()
+-Construct the plot on the screen device and then copy it to a PDF file with dev.copy2pdf()
 
 Ans :
 
-- Construct the plot on the screen device and then copy it to a PDF file with dev.copy2pdf()
+-Construct the plot on the screen device and then copy it to a PDF file with dev.copy2pdf()
 
