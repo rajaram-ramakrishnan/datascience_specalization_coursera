@@ -155,7 +155,7 @@ With new version of ggplot, both 1 and 3 produces the same result.
 qplot(Wind,Ozone,data=airquality,facets = . ~ factor(Month))
 ```
 
-- Link to Images
+<img src="https://github.com/rajaram-ramakrishnan/datascience_specalization_coursera/blob/master/04_Exploratory_Data_Analysis/Quiz/Quiz2/Qstn7.png" >
 
 ###### Question 8
 
@@ -231,4 +231,4 @@ Ans :
 qplot(votes, rating, data = movies) + geom_smooth()
 ```
 
-- Link to Images
+<img src="https://github.com/rajaram-ramakrishnan/datascience_specalization_coursera/blob/master/04_Exploratory_Data_Analysis/Quiz/Quiz2/Qstn10.png" >
