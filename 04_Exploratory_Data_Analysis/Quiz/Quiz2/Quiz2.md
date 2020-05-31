@@ -47,7 +47,8 @@ xyplot(weight ~ Time | Diet,BodyWeight)
 Answer :
 
 - A set of 3 panels showing the relationship between weight and time for each diet.
-- Link to Images
+
+<img src="https://github.com/rajaram-ramakrishnan/datascience_specalization_coursera/blob/master/04_Exploratory_Data_Analysis/Quiz/Quiz2/Qstn2.png" >
 
 ###### Question 3
 
