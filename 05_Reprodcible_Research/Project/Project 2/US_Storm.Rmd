@@ -1,0 +1,191 @@
+---
+title: "Analysis of Health Impact and Economic Consequences of US Storm"
+author: "Rajaram"
+date: "05/07/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Synopsis
+
+The goal of this project is to explore NOAA Storm Database and answer some questions regarding events. The events in database start in the year 1950 and end in November 2011. 
+
+This Project analysis address the following questions:
+
+  1. Across the united states, Which type of events are most harmful with respect to population health?
+  2. Across united states, which types of events has greatest economic consequences?
+  
+## Data
+
+The data for this analysis come in the form of comma-separated-value file compressed via the bzip2 algorithm to reduce its size.
+
+ [Storm Data](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2)
+ 
+To know about variables of the database , please see below links.
+
+* National Weather Service [Storm Data Documentation](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf)
+* National Climatic Data Center Storm Events [FAQ](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2FNCDC%20Storm%20Events-FAQ%20Page.pdf)
+
+
+## Data Processing
+
+### a) Data Loading
+
+Download the file from location and load this to data.table
+
+```{r Data loading}
+dataurl <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2"
+if (!file.exists("StormData.csv.bz2")) {
+ download.file(dataurl,destfile="StormData.csv.bz2")
+}
+
+  storm <- read.csv("StormData.csv.bz2")
+
+
+library(data.table)
+storm <- as.data.table(storm)
+```
+
+### b) Examine the variable names and decide the variable names to keep for the analysis
+
+```{r variable names}
+names(storm)
+keepcols <- c("EVTYPE","INJURIES","FATALITIES","PROPDMG","PROPDMGEXP",
+              "CROPDMG","CROPDMGEXP")
+```
+
+### c) Data Subsetting
+
+Subset the data where there is proper event recorded and variables used in the analysis are having more than 0.
+
+``` {r data subsetting}
+storm <- storm[, keepcols,with=FALSE]
+cols <- c("PROPDMGEXP", "CROPDMGEXP")
+
+## changing the type from factor to character for data transformations
+stormDT <- storm[, (cols) := lapply(.SD,as.character), 
+                 .SDcols = cols]
+
+## subset data for the events and measure variables are greater than 0
+stormDT <- stormDT[(EVTYPE != "?" & 
+        (INJURIES > 0 | FATALITIES > 0 | PROPDMG > 0 | CROPDMG > 0))]
+
+```
+
+### d) Data Transformation
+
+Data Transformation for Crop damage and Property damage exponential.
+Blank values are converted to 0, All alpha numeric notations are made in same case and converted to common notation.
+``` {r data transformation}
+table(stormDT$CROPDMGEXP)
+table(stormDT$PROPDMGEXP)
+
+stormDT[CROPDMGEXP=="",CROPDMGEXP := 0]
+stormDT[PROPDMGEXP=="",PROPDMGEXP := 0]
+
+stormDT[,  (cols) := c(lapply(.SD, toupper)), .SDcols = cols]
+table(stormDT$CROPDMGEXP)
+table(stormDT$PROPDMGEXP)
+
+cropDmgExpKey <-  c("?" = 10^0, 
+                    "0" = 10^0,
+                    "K" = 10^3,
+                    "M" = 10^6,
+                    "B" = 10^9)
+
+
+propDmgExpKey <-  c("-" = 10^0, 
+                    "+" = 10^0,
+                    "0" = 10^0,
+                    "1" = 10^1,
+                    "2" = 10^2,
+                    "3" = 10^3,
+                    "4" = 10^4,
+                    "5" = 10^5,
+                    "6" = 10^6,
+                    "7" = 10^7,
+                    "8" = 10^8,
+                    "9" = 10^9,
+                    "H" = 10^2,
+                    "K" = 10^3,
+                    "M" = 10^6,
+                    "B" = 10^9)
+
+
+stormDT[, CROPDMGEXP := cropDmgExpKey[as.character(stormDT[,CROPDMGEXP])]]
+stormDT[, PROPDMGEXP := propDmgExpKey[as.character(stormDT[,PROPDMGEXP])]]
+table(stormDT$CROPDMGEXP)
+table(stormDT$PROPDMGEXP)
+```
+
+### e) Calculate Cost 
+
+Cost of Property and Crop damage is calculated as follows : Cost * Cost Exp
+
+``` {r calculate cost}
+stormDT <- stormDT[, .(EVTYPE, FATALITIES, INJURIES, PROPDMG, PROPDMGEXP, PROPCOST = PROPDMG * PROPDMGEXP, CROPDMG, CROPDMGEXP, CROPCOST = CROPDMG * CROPDMGEXP)]
+```
+
+### f) Calculate Total Fatalaties and Injuries
+
+In this step, total fatalaties and Injuries are calculated and Top 10 are used for results
+
+``` {r Total Fatalaties and Injuries}
+totalhealthDT <- stormDT[, .(FATALITIES = sum(FATALITIES), INJURIES = sum(INJURIES), TOTALS = sum(FATALITIES) + sum(INJURIES)), by = .(EVTYPE)]
+totalhealthDT <- totalhealthDT[order(-FATALITIES), ]
+totalhealthDT <- totalhealthDT[1:10, ]
+head(totalhealthDT)
+```
+
+### g) Calculate Total Property and Crop Damage Cost
+
+In this step, Total Property and Crop Damage costs are calculated and Top 10 are used for results
+
+``` {r Total Property and Crop Damage Costs}
+totalCostDT <- stormDT[, .(PROPCOST = sum(PROPCOST), CROPCOST = sum(CROPCOST), TOTALCOST = sum(PROPCOST) + sum(CROPCOST)), by = .(EVTYPE)]
+totalCostDT <- totalCostDT[order(-TOTALCOST), ]
+totalCostDT <- totalCostDT[1:10, ]
+head(totalCostDT)
+```
+
+## Results
+
+### Events that are most harmful with respect to population health
+melting data for plot reprsentation
+
+```{r Health Consequences}
+health_consequences <- melt(totalhealthDT, id.vars="EVTYPE", variable.name = "HEALTHTYPE")
+head(health_consequences)
+```
+
+```{r results chart}
+library(ggplot2)
+ggplot(health_consequences, aes(x=reorder(EVTYPE,value), y=value))+
+  geom_bar(stat="identity",aes(fill=HEALTHTYPE),position="dodge")+
+  labs(title="Top 10 Event Types for Fatalaties/Injuries",x="Event Type", y="Number of Health Consequences")+
+  coord_flip()
+```
+
+### Events that have greatest economic consequences
+melting data for plot reprsentation
+
+```{r economic cosnequences}
+econ_consequences <- melt(totalCostDT, id.vars="EVTYPE", variable.name = "DAMAGETYPE")
+econ_consequences[, DAMAGETYPE := ordered(DAMAGETYPE, levels = c("CROPCOST","PROPCOST","TOTALCOST"))]
+head(econ_consequences)
+```
+
+```{r results chart2}
+library(ggplot2)
+options(scipen=999)
+ggplot(econ_consequences, aes(x=reorder(EVTYPE,value), y=value))+
+  geom_bar(stat="identity",aes(fill=DAMAGETYPE),position="dodge")+
+  labs(title="Top 10 Event Types impacts economy",x="Event Type", y="Cost of Impact")+
+  coord_flip()
+options(scipen=0)
+```
+
+
