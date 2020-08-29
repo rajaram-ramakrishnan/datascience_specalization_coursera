@@ -1,0 +1,114 @@
+---
+title: "Statistics Inference Project Part 2"
+author: "Rajaram"
+date: "02/08/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Basic Inferential Data Analysis
+In this part of project, we analyze ToothGrowth data from datasets package in R. We are going to check if there is any effect of tooth growth based on dosage of Vitamin C or supplement type of the dose. 
+
+## Load Data
+
+We are going to load the data from datasets package and check the structure of data.
+
+```{r load_data}
+library(datasets)
+toothgrowth <- ToothGrowth
+str(toothgrowth)
+```
+
+## Data Check and Transformation
+We are going to check the data for completness and perform transformation before EDA.
+
+```{r data_check}
+sum(!complete.cases(toothgrowth))
+```
+There is no row with NA. Lets have a look at the data summary.
+
+```{r data_summary}
+summary(toothgrowth)
+```
+
+Data Summary looks ok. We will modify the dose to factor as we have only 3 values.
+
+```{r data_transform}
+unique(toothgrowth$dose)
+toothgrowth$dose <- as.factor(toothgrowth$dose)
+```
+
+## Exploratory data analysis
+
+We will have a look at the relationship between length vs dose/supplement type in boxplot.
+
+```{r box_plot_1}
+library(ggplot2)
+
+
+ggplot(toothgrowth, aes(x=dose, y=len, fill=dose))+
+  geom_boxplot()+
+  labs(title ="Boxplot of tooth length by dose", x="Dose in mg",y="Tooth length")+
+  theme(plot.title = element_text(hjust=0.5))
+```
+From the above plot, we can infer higher the dose, longer the teeth are.Also, we can notice tooth length of 1 mg dose is twice as much as of tooth length of 0.5 mg. But the same is not the case between 2 mg and  1 mg.The box position is diffrent between the doses.
+
+Lets now have a look at supplement type.
+```{r box_plot_2}
+ggplot(toothgrowth, aes(x=supp,y=len,fill=supp))+
+  geom_boxplot()+
+  labs(title ="Boxplot of tooth length by supplement type", x="Supplement Factor",y="tooth length")+
+  theme(plot.title = element_text(hjust=0.5))
+```
+
+The shape of the box look similar, however there is a difference in median line. Median for Oranje Juicie is higher, which means high values are more than low values.
+
+## Hypothesis Tests
+Now, we will test if supplement type has any effect on the tooth growth.
+
+H0: The supplement type doesnt have any effect on tooth growth
+
+Ha: The supplement type has effect on tooth growth
+
+```{r t_test_del_method}
+t.test(len ~ supp, data = toothgrowth)
+```
+
+The above tests shows the folllowing :
+
+1. P-value is more than significance level of 0.05.
+
+2. Confidence Interval contains 0, which shows test is not really significant.
+
+There are not enough evidences to reject the null hypothesis. We fail to reject the null hypothesis that the diffrent supplement type does not have any effect on tooth growth.
+
+Lets test if dose has any effect on the tooth growth.
+
+H0: The dosage doesnt have any effect on tooth growth
+
+Ha: The dosage has effect on tooth growth
+
+```{r t_test_dose}
+doses_0.5_1.0 <- toothgrowth[toothgrowth$dose %in% c(0.5,1.0),]
+doses_1.0_2.0 <- toothgrowth[toothgrowth$dose %in% c(1.0,2.0),]
+doses_0.5_2.0 <- toothgrowth[toothgrowth$dose %in% c(0.5,2.0),]
+t.test(len ~ dose, data = doses_0.5_1.0)
+t.test(len ~ dose, data = doses_1.0_2.0)
+t.test(len ~ dose, data = doses_0.5_2.0)
+```
+
+For all the dose level pairs, p-value is less than significance level of 0.05 and the confidence interval doesn't contain zero. Hence, we can reject the null hypothesis.
+
+## Conclusions
+
+1. Supplement type has no effect on tooth length
+
+2. Dose levels has an effect on tooth length
+
+## Assumptions
+
+1. The expriment was done with random assignment of guinea pigs with one of the dose levels and by one of the supplement types.
+
+2. 60 guinea pigs are reprsentative of the population

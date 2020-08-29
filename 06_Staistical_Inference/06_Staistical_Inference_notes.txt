@@ -1,0 +1,13 @@
+Variability :
+
+ Key measures of spread is variablity. We measure through variance or square root of that called standard deviation.
+ SD is of same measure as population. If population is m , SD is m and variance is meter squared.
+ 
+  Var(X) = E[(X-mu)^2] = E(X^2) - E(X)^2
+  
+  Sample Variance :
+  
+     Sum(Xi-X)^2/n-1
+	 
+	more nb of samples, less variance we tend to get
+	
