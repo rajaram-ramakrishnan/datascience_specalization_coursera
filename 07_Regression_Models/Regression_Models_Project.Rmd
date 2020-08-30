@@ -1,0 +1,167 @@
+---
+title: "Regression Models Project - Motor Trend Magazine"
+author: "Rajaram"
+date: "30/08/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Executive Summary
+
+As part of this project, we are looking at a data set of collection of cars and interested in exploring relationship between the set of variables and miles per gallon (MPG). 
+
+We are interested in addressing the following 2 questions using linear regression:
+
+- Is an automatic or manual transmission better for MPG?
+- Quantify the MPG difference between automatic and manual transmissions
+
+### Data Description
+
+We are going to use mtcars dataset for the regression modeling to illustrate how automatic or manual transmission cars affect MPG.
+
+The data was extracted from the 1974 Motor Trend US magazine, and comprises fuel consumption and 10 aspects of automobile design and performance for 32 automobiles (1973–74 models).
+
+This dataset consists of 11 variables, all are numeric.
+
+- mpg	Miles/(US) gallon
+- cyl	Number of cylinders
+- disp	Displacement (cu.in.)
+- hp	Gross horsepower
+- drat	Rear axle ratio
+- wt	Weight (1000 lbs)
+- qsec	1/4 mile time
+- vs	Engine (0 = V-shaped, 1 = straight)
+- am	Transmission (0 = automatic, 1 = manual)
+- gear	Number of forward gears
+- carb	Number of carburetors
+
+## Data Preparation
+
+In this section, we load in the data and do necessary transformation, which is coercing some variables to factor variables.
+
+```{r data_prep1}
+mtcars <- mtcars
+mtcars$cyl <- as.factor(mtcars$cyl)
+mtcars$vs <- as.factor(mtcars$vs)
+mtcars$am <- as.factor(mtcars$am)
+mtcars$gear <- as.factor(mtcars$gear)
+mtcars$carb <- as.factor(mtcars$carb)
+levels(mtcars$am) <- c("Auto","Manual")
+```
+
+## Exploratory Data Analysis
+
+In this section, we are going to check if transmission type has any relationship with MPG.
+
+Refer to Fig.1 in Appendix.Boxplot clearly shows that manual transmission cars provides better mileage than automatic transmission cars.
+
+We will check statistically if the above information derived from boxplot is correct using t tests.
+
+```{r t_test}
+autoTrans <- mtcars[mtcars$am=="Auto",]
+manualTrans <- mtcars[mtcars$am=="Manual",]
+t.test(autoTrans$mpg, manualTrans$mpg)
+```
+
+As per T test results, p-value is around 0.001 which is less than significance level of 0.05. Hence, we reject the null hypothesis that there is no difference between mpg for manual vs auto transmission cars. 
+
+
+## Regression analysis
+
+We are going to perform regression analysis with single variable to check if there is a relationship between to support there is a relationship between transmission type and MPG.Based on the results, we will perform regression analysis with multiple variables.
+
+```{r lin_reg single}
+lrModel <- lm(mpg ~ am, data = mtcars)
+summary(lrModel)
+```
+
+As per summary of results, it shows there is a relationship between transmission type and MPG. Estimated MPG of automatic transmission cars is 17 and manual transmission cars is 7.2 more than automatic transmission cars.However, R-squared score of 0.3598 suggests that transmission type accounts for only 35% of the performance of MPG. Hence, there might be some other factors which influence mpg.
+
+We use analysis of variance and step function for our model selection.
+
+```{r ANOVA}
+t_var <- aov(mpg ~ ., data=mtcars)
+summary(t_var)
+```
+
+From the output of analysis of variance tests, We can consider cyl, disp and wt variables along with am for regression model.
+
+We will perform step function to cross check, if there are any other factors to be considered.
+
+As per scatterplot in Appendix also confirms the same about relationship of mpg with these variables.
+
+```{r results = 'hide'}
+fullModelFit <- lm(mpg ~ ., data = mtcars)
+stepFit <- step(fullModelFit)
+```
+```{r}
+summary(stepFit)
+```
+
+Step function identifies cyl, hp and wt variables to consider for the slope and this produces R-Squared score of 0.8659. Hence we will go with this combination for multiple variable linear regression.
+
+```{r multiple linear reg}
+mrModel <- lm (mpg ~ am+cyl+hp+wt, data=mtcars)
+summary(mrModel)
+```
+
+From the above, we observe that R-squared value is 0.8659. We conclude that more than 86% of MPG variability comes from these variables.
+
+## Residual and Diagnostics
+
+In this section, we examine residual plots of our regression model and compute some diagnostics to identify outliers in dataset
+
+```{r}
+par(mfrow = c(2,2))
+plot(mrModel)
+```
+
+The following observations can be made from the above plots:
+
+- Residual vs Fitted plot is randomly scattered and verify the independence
+- Normal Q-Q plot points mostly fall on the line indicating results are normally distributed
+- Scale-Location plot points scattered in a constant band pattern
+- Residuals vs Leverage plot points shows some outliers
+
+We will compute diagnostics of our model now
+
+```{r}
+leverage <- hatvalues(mrModel)
+tail(sort(leverage),3)
+influential <- dfbetas(mrModel)
+tail(sort(influential[,6]),3)
+```
+
+## Conclusion
+
+- Exploratory data analysis is conducted first to identify the relationship between MPG and manual/automatic transmission types.
+- We infer manual transmission type cars gives 7.25 MPG better than automatic transmission types
+- We then performed linear regression with one variable to check the relationship between MPG vs AM.
+- Eventhough there was a relationship, R-Squared value is around 0.35 which explains variance of 35% can be accounted based on transmission type.
+- Hence, Simple linear regression is not a very good model to answer definitively.
+- We incorporate multiple variables linear regressions by conducting analysis of variance and step functions
+- From the above tests, we identified there is a need to consider Number of Cylinders, Gross horsepower and Weight of the car.
+- This model seems to be a very good which explains these variables account for 86% variance of MPG
+
+## Appendix
+
+Boxplot of MPG vs Transmission Types
+
+```{r boxplot}
+library(ggplot2)
+transtyp <- ggplot(mtcars, aes(x=am, y=mpg)) + geom_boxplot(aes(fill=am))
+transtyp <- transtyp + labs(title ="Auto/Manual transmission vs mpg boxplot")
+transtyp <- transtyp + theme(plot.title=element_text(hjust = 0.5))
+transtyp <- transtyp + xlab("Transmission Type") + ylab("Miles Per Gallon")
+transtyp
+```
+
+scatter plot matrix for mtcars dataset
+```{r}
+pairs(mpg ~ ., data = mtcars)
+```
+
+
