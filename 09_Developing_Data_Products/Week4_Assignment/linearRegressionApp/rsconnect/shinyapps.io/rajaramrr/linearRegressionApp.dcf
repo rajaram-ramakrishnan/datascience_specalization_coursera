@@ -1,0 +1,12 @@
+name: linearRegressionApp
+title: linearRegressionApp
+username:
+account: rajaramrr
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3187907
+bundleId: 3834138
+url: https://rajaramrr.shinyapps.io/linearRegressionApp/
+when: 1604844863.9147
+asMultiple: FALSE
+asStatic: FALSE

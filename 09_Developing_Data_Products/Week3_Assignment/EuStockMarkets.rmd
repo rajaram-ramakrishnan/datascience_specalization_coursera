@@ -1,0 +1,43 @@
+---
+title: "EuStockmarkets using plotly"
+author: "Rajaram"
+date: "01/11/2020"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Objective
+
+Create a webpage presentation using R markdown that features a plot created with plotly. Host your webpage on either GitHub Pages, R Pubs or NeoCities. Your webpage must contain the date that you created the document, and it must contain a plot created with plotly.
+
+## Date
+```{r echo=FALSE}
+format(Sys.Date(), format= "%d %B, %Y")
+```
+
+## Plot of EuStockmarkets data of diffrent stock indexes.
+We are going top use EuStockMarkets data to plot the time series plotting of prices for different indexes.
+
+```{r echo=FALSE}
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(tidyr))
+suppressPackageStartupMessages(library(plotly))
+data("EuStockMarkets")
+stocks <- as.data.frame(EuStockMarkets) %>%
+  gather(index,price) %>%
+  mutate(time=rep(time(EuStockMarkets),4))
+```
+
+## Plot
+```{r warning=FALSE}
+plot_ly(stocks,x=~time,y=~price,color=~index,type="scatter",mode="markers") %>%
+  layout(title = "Stocks Data")
+```
+
+
+
+
+

@@ -1,0 +1,66 @@
+---
+title: "Leaflet assignment"
+author: "Rajaram"
+date: "24/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Objective
+
+Create a web page using R Markdown that features a map created with leaflet.
+
+Host your webpage on either GitHub Pages, RPubs or NeoCities.
+
+Your webpage must contain the date that you created the document, and it must contain a map created with leaflet.
+
+## Date
+
+```{r echo=FALSE}
+format(Sys.Date(), format= "%d %B, %Y")
+```
+
+## Map with Markers
+
+We are going to mark some important tourist destinations in Karnataka in the state of India through markers functionality of leaflet.
+
+```{r markers}
+library(leaflet)
+kar_tour_places <- data.frame(name = c("Coorg","Mysore","Chikmagalur","Hampi",
+                                       "Bangalore", "Udupi", "Murudeshwar",  
+                                       "Gokarna", "Bandipur National Park" ,
+                                       "Nagarhole National Park",
+                                       "Shivanasamudra Falls",
+                                       "Sakleshpur","Dandeli",
+                                       "Pattadkal","Belur","Jog Falls"),
+                              lat = c(12.3375,12.2958,13.3161,
+                                      15.3350,12.9716,13.3409,14.0940,
+                                      14.5479,11.7788,12.0314,12.2997,
+                                      12.9442,15.2361,15.9488,
+                                      13.1623,14.2004) ,
+                              lng =  c(75.8069,76.6394,75.7720,
+                                       76.4600,77.5946,74.7421,74.4899,
+                                      74.3188,76.4647,76.1207,77.1773,
+                                      75.7866,74.6173,75.8164,
+                                      75.8679,74.7922)
+                              )
+
+kar_tour_places %>%
+  leaflet() %>%
+  addTiles() %>%
+  addMarkers(lat=kar_tour_places$lat, lng= kar_tour_places$lng,
+             popup = kar_tour_places$name)
+```
+
+## Add a cluster
+Zoom in the cluster to see individual markers
+```{r cluster}
+kar_tour_places %>%
+  leaflet() %>%
+  addTiles() %>%
+  addMarkers(lat=kar_tour_places$lat, lng= kar_tour_places$lng,
+             popup = kar_tour_places$name,
+             clusterOptions = markerClusterOptions())
+```
