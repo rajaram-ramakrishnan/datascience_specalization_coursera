@@ -1,0 +1,217 @@
+---
+title: "Data Science Capstone - Week 2 - Milestone Report"
+author: "Rajaram"
+date: "04/01/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Overview
+This is milestone report for week 2 of data science specialization. The overall goal is to build a model which predicts the most likely next word when user inputs word or phrase.
+
+The goal for this assignment is to understand dataset and perform exploratory data analysis for three text files namely blogs, news and twitter. Also, this analysis helps us to chose a prediction plan later in the project. 
+
+## Set Working directory
+```{r wd}
+setwd("F:/Knowledge/Coursera/Data Science Specalization/Capstone Project")
+```
+
+## Download and Import Data
+In this step, we download the data from URL and unzip the contents and read these data into R.
+
+```{r download}
+if (!file.exists("Coursera-SwiftKey.zip")){
+  download.file(url = "https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip", destfile = "Coursera-SwiftKey.zip")
+  unzip("Coursera-SwiftKey.zip")
+}
+
+blogs <- readLines(con = file("./final/en_US/en_US.blogs.txt"),
+                   encoding= "UTF-8", skipNul = TRUE, warn = FALSE)
+news <- readLines(con = file("./final/en_US/en_US.news.txt"),
+                   encoding= "UTF-8", skipNul = TRUE,warn=FALSE)
+twitter <- readLines(con = file("./final/en_US/en_US.twitter.txt"),
+                  encoding= "UTF-8", skipNul = TRUE,warn=FALSE)
+```
+
+## Generate Statistics
+In this step, we generate file statistics like size, Nb of Lines, Characters and Words etc.
+
+```{r file_stats}
+library(stringi)
+file_stats <- data.frame(
+                FileName = c("Blogs","News","Twitter"),
+                FileSize = sapply(list(blogs,news,twitter),
+                                  function(x){format(object.size(x),"MB")}),                      t(rbind(sapply(list(blogs,news,twitter),stri_stats_general),
+                Words = sapply(list(blogs,news,twitter),stri_stats_latex)[4,])
+                  )
+                        )
+
+file_stats
+```
+
+## Sampling
+
+From the above step, we see that file sizes are huge. We will sample 1% of data and check the size of VCorpus loaded to memory.
+
+```{r sampling}
+set.seed(20210103)
+sampleSize <- 0.01
+
+blogs_sample <- sample(blogs, length(blogs) * sampleSize)
+news_sample <- sample(news, length(news) * sampleSize)
+twitter_sample <- sample(twitter, length(twitter) * sampleSize)
+
+sampleData <- c(blogs_sample,news_sample,twitter_sample)
+```
+
+## Sample data statistics
+
+We will generate statistics for the sample data to make sure file sizes are not too large
+
+```{r sample_stats}
+samplefile_stats <- data.frame(
+           FileName = c("Blogs","News","Twitter","Sample"),
+           FileSize =sapply(list(blogs_sample,news_sample,twitter_sample,sampleData), function(x){format(object.size(x),"MB")}),
+           t(rbind(sapply(list(blogs_sample,news_sample,twitter_sample,sampleData),stri_stats_general),
+          Words = sapply(list(blogs_sample,news_sample,twitter_sample,sampleData),stri_stats_latex)[4,])
+            )
+                             )
+samplefile_stats
+```
+
+## Build corpus and clean the data
+In this step, we build the corpus and then cleaning the data.
+The following cleanup we will perform in this step:
+
+* Converting all to lowercase
+* Remove Punctuation
+* Remove Numbers
+* Remove whitespaces
+
+```{r cleanup}
+library(tm)
+library(pryr)
+
+sample_corpus <- VCorpus(VectorSource(sampleData))
+object_size(sample_corpus)
+
+sample_corpus <- tm_map(sample_corpus,content_transformer(tolower)) # convert to lower case
+sample_corpus <- tm_map(sample_corpus,removePunctuation)
+sample_corpus <- tm_map(sample_corpus,removeNumbers)
+sample_corpus <- tm_map(sample_corpus,stripWhitespace)
+sample_corpus <- tm_map(sample_corpus,PlainTextDocument)
+```
+
+## Construction of N-grams
+We need to tokenize the cleaned data and construct the set of N-grams. We will build the following N-grams:
+
+* Unigram - Single word patterns
+* Bigram -  Two word patterns
+* Trigram - Three word patterns
+
+```{r n_grams}
+library(RWeka)
+unigram <- function(x) { NGramTokenizer(x, Weka_control(min=1, max=1))}
+bigram <- function(x) { NGramTokenizer(x, Weka_control(min=2, max=2))}
+trigram <- function(x) { NGramTokenizer(x, Weka_control(min=3, max=3))}
+
+uni_mat <- TermDocumentMatrix(sample_corpus, control = list(tokenize = unigram))
+bi_mat <- TermDocumentMatrix(sample_corpus, control = list(tokenize= bigram))
+tri_mat <- TermDocumentMatrix(sample_corpus, control = list(tokenize= trigram))
+```
+
+## Calculate Frequencies of N-grams
+After matrix is formed, we need to calculate frequencies
+```{r freq}
+uni_ft <- findFreqTerms(uni_mat,lowfreq=30)
+uniFreq <- rowSums(as.matrix(uni_mat[uni_ft,]))
+uniFreq <- data.frame(word = names(uniFreq), frequency = uniFreq)
+
+bi_ft <- findFreqTerms(bi_mat, lowfreq=25)
+biFreq <- rowSums(as.matrix(bi_mat[bi_ft,]))
+biFreq <- data.frame(word = names(biFreq), frequency = biFreq)
+
+
+tri_ft <- findFreqTerms(tri_mat, lowfreq=20)
+triFreq <- rowSums(as.matrix(tri_mat[tri_ft,]))
+triFreq <- data.frame(word = names(triFreq), frequency = triFreq)
+```
+Now we will see the Words and their frequencies.
+
+```{r freq_counts}
+head(uniFreq)
+head(biFreq)
+head(triFreq)
+```
+
+For visualization purpose , we will re-arrange the data in terms of descending frequency.
+
+```{r rearrange}
+library(dplyr)
+uniFreqDesc <- arrange(uniFreq,desc(frequency))
+biFreqDesc <- arrange(biFreq,desc(frequency))
+triFreqDesc <- arrange(triFreq,desc(frequency))
+```
+
+## Visualize data
+Now, we will generate histograms to see Top 20 Unigrams, Bigrams and Trigrams.
+
+```{r visualise}
+library(ggplot2)
+
+ggplot(data=uniFreqDesc[1:20,], aes(x=reorder(word,-frequency), y = frequency))+
+          geom_bar(stat = "identity", fill="orange")+
+          xlab("Words")+
+          ylab("Frequency")+
+          ggtitle("Top 20 Unigrams")+
+          theme(plot.title = element_text(hjust = 0.5))+
+          theme(axis.text.x=element_text(angle=45, hjust=1))
+
+
+ggplot(data=biFreqDesc[1:20,], aes(x=reorder(word,-frequency), y = frequency))+
+  geom_bar(stat = "identity", fill="green")+
+  xlab("Words")+
+  ylab("Frequency")+
+  ggtitle("Top 20 Bigrams")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme(axis.text.x=element_text(angle=45, hjust=1))
+
+ggplot(data=triFreqDesc[1:20,], aes(x=reorder(word,-frequency), y = frequency))+
+  geom_bar(stat = "identity", fill="blue")+
+  xlab("Words")+
+  ylab("Frequency")+
+  ggtitle("Top 20 Trigrams")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme(axis.text.x=element_text(angle=45, hjust=1))
+```
+
+## Wordcloud
+
+Also, we generate wordcloud to visualize in a better way.  The most used keywords stands out better in word cloud. 
+
+```{r word_cloud}
+library(wordcloud)
+
+uniCloud <- wordcloud(uniFreq$word, uniFreq$frequency, scale = c(4, 0.5), 
+                      max.words = 100, random.order = FALSE, rot.per = 0.25, 
+                      use.r.layout = FALSE, colors = brewer.pal(8, "Dark2"))
+
+
+biCloud <- wordcloud(biFreq$word, biFreq$frequency, scale = c(4, 0.5), 
+                      max.words = 100, random.order = FALSE, rot.per = 0.25, 
+                      use.r.layout = FALSE, colors = brewer.pal(8, "Dark2"))
+
+
+triCloud <- wordcloud(triFreq$word, triFreq$frequency, scale = c(2, 0.5), 
+                     max.words = 100, random.order = FALSE, rot.per = 0.25, 
+                     use.r.layout = FALSE, colors = brewer.pal(8, "Dark2"))
+```
+
+## Next Steps
+
+* Build and test different prediction models
+* Evaluate the performance of the model
+* Build, test and deploy shiny app with simple user interface which accepts user input and predicts the next word
+* Create a presentation Pitch

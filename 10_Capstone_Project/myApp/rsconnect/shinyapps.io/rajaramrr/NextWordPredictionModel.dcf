@@ -1,0 +1,12 @@
+name: NextWordPredictionModel
+title: NextWordPredictionModel
+username:
+account: rajaramrr
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3595570
+bundleId: 4191218
+url: https://rajaramrr.shinyapps.io/NextWordPredictionModel/
+when: 1612682366.5721
+asMultiple: FALSE
+asStatic: FALSE
